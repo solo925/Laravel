@@ -11,7 +11,7 @@ class TeamController extends Controller
     public function index()
     {
         return view('teams.index', [
-            'teams' => Auth()::user()->teams,
+            'teams' => \auth()->user()->teams,
         ]);
 
     }
@@ -31,6 +31,10 @@ class TeamController extends Controller
         $team = auth()->user()->ownedTeams()->create([
             'name' => $request->name,
         ]);
+
+        $user = auth()->user();
+        $user->current_team_id = $team->id;
+        $user->save();
 
         return redirect()->route('teams.index')->with('success', 'Team created successfully!');
     }
