@@ -4,6 +4,8 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\CurrentTeamController;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
@@ -29,6 +31,12 @@ Route::middleware('auth')->group(function () {
 
     // deleting teams
     Route::delete('/teams/{team}', [CurrentTeamController::class, 'destroy'])->name('teams.destroy');
+
+    // Projects Routes
+    Route::resource('projects', ProjectController::class);
+
+    // tasks Routes
+    Route::resource('tasks', TaskController::class);
 });
 
 require __DIR__.'/auth.php';

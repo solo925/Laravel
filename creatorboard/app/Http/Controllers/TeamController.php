@@ -10,10 +10,18 @@ class TeamController extends Controller
 {
     public function index()
     {
+        $user = auth()->user();
+        
+        // Get both owned teams and teams the user is a member of
+        $ownedTeams = $user->ownedTeams;
+        $memberTeams = $user->teams;
+        
+        // Merge and remove duplicates
+        $allTeams = $ownedTeams->merge($memberTeams)->unique('id');
+        
         return view('teams.index', [
-            'teams' => \auth()->user()->teams,
+            'teams' => $allTeams,
         ]);
-
     }
 
     public function create()
