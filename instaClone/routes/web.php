@@ -14,6 +14,14 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+// Lightweight health check
+Route::get('/health', function () {
+    return response()->json([
+        'ok' => true,
+        'service' => config('app.name'),
+    ]);
+});
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit.form');
