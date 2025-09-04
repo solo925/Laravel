@@ -77,12 +77,28 @@
                         <div class="px-6 py-3 border-t border-gray-200 dark:border-gray-700">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-6">
-                                    <button class="flex items-center space-x-2 text-gray-500 hover:text-blue-600 transition-colors">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                                        </svg>
-                                        <span>Like</span>
-                                    </button>
+                                    <form action="{{ route('likes.toggle') }}" method="POST" class="like-form inline">
+                                        @csrf
+                                        <input type="hidden" name="post_id" value="{{ $post->id }}">
+                                        <button type="submit" class="flex items-center space-x-2 transition-colors like-btn
+                                            @if($post->isLikedBy(auth()->id()))
+                                                text-red-500 hover:text-red-600
+                                            @else
+                                                text-gray-500 hover:text-red-500
+                                            @endif">
+                                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                            </svg>
+                                            <span class="like-text">
+                                                @if($post->isLikedBy(auth()->id()))
+                                                    Unlike
+                                                @else
+                                                    Like
+                                                @endif
+                                            </span>
+                                            <span class="like-count">({{ $post->like_count }})</span>
+                                        </button>
+                                    </form>
                                     <button class="flex items-center space-x-2 text-gray-500 hover:text-green-600 transition-colors">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
@@ -176,4 +192,54 @@
             @endif
         </div>
     </div>
+
+    <!-- JavaScript for Like Functionality -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.like-form').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(this);
+                    const button = this.querySelector('.like-btn');
+                    const likeText = this.querySelector('.like-text');
+                    const likeCount = this.querySelector('.like-count');
+                    
+                    // Disable button during request
+                    button.disabled = true;
+                    
+                    fetch(this.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Update button appearance
+                        if (data.liked) {
+                            button.className = button.className.replace('text-gray-500 hover:text-red-500', 'text-red-500 hover:text-red-600');
+                            likeText.textContent = 'Unlike';
+                        } else {
+                            button.className = button.className.replace('text-red-500 hover:text-red-600', 'text-gray-500 hover:text-red-500');
+                            likeText.textContent = 'Like';
+                        }
+                        
+                        // Update like count
+                        likeCount.textContent = `(${data.like_count})`;
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Something went wrong. Please try again.');
+                    })
+                    .finally(() => {
+                        // Re-enable button
+                        button.disabled = false;
+                    });
+                });
+            });
+        });
+    </script>
 </x-app-layout>

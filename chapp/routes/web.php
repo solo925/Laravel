@@ -10,7 +10,9 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    $posts = \App\Models\Post::with(['user', 'comments.user'])->latest()->paginate(10);
+    $posts = \App\Models\Post::with(['user', 'comments' => function($query) {
+        $query->with('user')->latest();
+    }, 'likes'])->latest()->paginate(10);
     return view('dashboard', compact('posts'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -23,6 +25,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('posts', App\Http\Controllers\PostController::class);
     Route::resource('comments', App\Http\Controllers\CommentsController::class)
         ->parameters(['comments' => 'comment']);
+    
+    // Like routes
+    Route::post('/likes/toggle', [App\Http\Controllers\LikesController::class, 'toggle'])->name('likes.toggle');
+    Route::resource('likes', App\Http\Controllers\LikesController::class);
 });
 
 require __DIR__.'/auth.php';

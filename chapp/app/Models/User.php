@@ -6,6 +6,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Post;
+use App\Models\Comment;
+use App\Models\Likes;
 
 class User extends Authenticatable
 {
@@ -51,5 +54,9 @@ class User extends Authenticatable
     }
     public function comment(){
         return $this->hasMany(Comment::class);
+    }
+
+    public function likes(){
+        return $this->hasMany(Likes::class);
     }
 }

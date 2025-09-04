@@ -12,7 +12,9 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::with(['user', 'comments'])->latest()->paginate(10);
+        $posts = Post::with(['user', 'comments' => function($query) {
+            $query->with('user')->latest();
+        }, 'likes'])->latest()->paginate(10);
         return view('posts.index', compact('posts'));
     }
 
@@ -47,7 +49,9 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        $post->load(['user', 'comments.user']);
+        $post->load(['user', 'comments' => function($query) {
+            $query->with('user')->latest();
+        }, 'likes']);
         return view('posts.show', compact('post'));
     }
 
